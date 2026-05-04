@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Widget Progression</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: transparent; color: #37352f; }
+  .w { padding: 20px 24px; }
+  .w-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .w-label { font-size: 13px; color: #6b6b6b; }
+  .w-step { font-size: 13px; font-weight: 600; color: #6c5ce7; }
+  .bar { display: flex; gap: 4px; margin-bottom: 8px; }
+  .seg { height: 10px; flex: 1; border-radius: 5px; transition: background 0.4s; }
+  .seg-done { background: #6c5ce7; }
+  .seg-active { background: #6c5ce7; animation: pulse 2s ease-in-out infinite; }
+  .seg-todo { background: #e9e9e7; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .labels { display: flex; justify-content: space-between; margin-bottom: 18px; }
+  .lbl { font-size: 11px; color: #b0b0a8; text-align: center; flex: 1; transition: all 0.3s; }
+  .lbl-done { color: #6c5ce7; }
+  .lbl-active { color: #6c5ce7; font-weight: 700; }
+  .msg { border-radius: 10px; padding: 16px 18px; border-left: 4px solid #6c5ce7; background: #f5f3ff; margin-bottom: 20px; }
+  .msg-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .msg-dot { width: 8px; height: 8px; border-radius: 50%; background: #6c5ce7; animation: pulse 2s ease-in-out infinite; }
+  .msg-title { font-size: 14px; font-weight: 600; color: #6c5ce7; }
+  .msg-text { font-size: 14px; color: #5a5178; line-height: 1.6; }
+  .next-h { font-size: 13px; font-weight: 600; color: #6b6b6b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .acc { border: 1px solid #e9e9e7; border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+  .acc-btn { width: 100%; background: none; border: none; padding: 12px 14px; font-size: 14px; color: #37352f; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; text-align: left; transition: background 0.2s; }
+  .acc-btn:hover { background: #f8f8f6; }
+  .acc-arrow { font-size: 10px; color: #b0b0a8; transition: transform 0.2s; flex-shrink: 0; }
+  .acc-arrow.open { transform: rotate(90deg); }
+  .acc-num { width: 22px; height: 22px; border-radius: 50%; background: #e9e9e7; color: #6b6b6b; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .acc-name { flex: 1; }
+  .acc-body { padding: 0 14px 14px 44px; font-size: 13px; color: #6b6b6b; line-height: 1.6; display: none; }
+  .acc-body.open { display: block; }
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="w-head">
+    <span class="w-label">Avancement de votre projet</span>
+    <span class="w-step" id="stepLabel"></span>
+  </div>
+  <div class="bar" id="bar"></div>
+  <div class="labels" id="labels"></div>
+  <div class="msg" id="msg">
+    <div class="msg-head">
+      <div class="msg-dot"></div>
+      <span class="msg-title" id="msgTitle"></span>
+    </div>
+    <p class="msg-text" id="msgText"></p>
+  </div>
+  <div id="nextSection">
+    <div class="next-h">Prochaines étapes</div>
+    <div id="accordions"></div>
+  </div>
+</div>
+<script>
+var steps = [
+  { short: "Infos collectées", full: "Formulaire rempli", msg: "Formulaire rempli — vos informations ont bien été collectées.", detail: "Nous avons bien reçu toutes vos informations via le formulaire. Notre équipe va maintenant analyser vos besoins et préparer la création de votre site." },
+  { short: "Création", full: "Création en cours", msg: "Votre site est en cours de création par notre équipe.", detail: "Notre équipe travaille actuellement sur la construction de votre site web. Design, intégration de vos contenus, responsive mobile — tout est en cours." },
+  { short: "Vos retours", full: "En attente de vos retours", msg: "Première version envoyée — nous attendons vos retours.", detail: "Votre première version est prête ! Consultez le lien de preview et partagez-nous vos retours pour qu'on puisse ajuster." },
+  { short: "Mise à jour", full: "Mise à jour du site", msg: "Vos retours sont pris en compte, mise à jour de votre site en cours.", detail: "Nous intégrons vos retours et modifications. Une nouvelle version vous sera envoyée prochainement." },
+  { short: "Site finalisé", full: "Site finalisé", msg: "Votre site est finalisé et prêt à être mis en ligne !", detail: "Votre site est terminé ! Nom de domaine, SSL, SEO de base, email professionnel — tout est configuré pour la mise en ligne." },
+  { short: "Service en cours", full: "Service souscrit", msg: "Service souscrit — traitement en cours.", detail: "Votre service complémentaire est en cours de mise en place. Notre équipe s'en occupe activement." },
+  { short: "En service", full: "Site en ligne", msg: "Votre site est en ligne — suivi de votre projet en cours.", detail: "Votre site est en ligne et opérationnel. Nous assurons le suivi et restons disponibles pour toute question." }
+];
+
+var specialMsg = {
+  title: "En attente d'éléments",
+  text: "Nous attendons certains éléments de votre part pour continuer. Consultez vos messages ou contactez-nous pour débloquer la situation."
+};
+
+var params = new URLSearchParams(window.location.search);
+var currentStep = parseInt(params.get("etape")) || 0;
+var isWaiting = params.get("attente") === "1";
+
+function render() {
+  var bar = document.getElementById("bar");
+  var labelsEl = document.getElementById("labels");
+  var stepLabel = document.getElementById("stepLabel");
+  var msgTitle = document.getElementById("msgTitle");
+  var msgText = document.getElementById("msgText");
+  var accordions = document.getElementById("accordions");
+  var nextSection = document.getElementById("nextSection");
+
+  stepLabel.textContent = "Étape " + (currentStep + 1) + "/7";
+  bar.innerHTML = "";
+  labelsEl.innerHTML = "";
+
+  for (var i = 0; i < steps.length; i++) {
+    var seg = document.createElement("div");
+    seg.className = "seg";
+    if (i < currentStep) seg.className += " seg-done";
+    else if (i === currentStep) seg.className += " seg-active";
+    else seg.className += " seg-todo";
+    bar.appendChild(seg);
+
+    var lbl = document.createElement("div");
+    lbl.className = "lbl";
+    if (i < currentStep) lbl.className += " lbl-done";
+    else if (i === currentStep) lbl.className += " lbl-active";
+    lbl.textContent = steps[i].short;
+    labelsEl.appendChild(lbl);
+  }
+
+  if (isWaiting) {
+    msgTitle.textContent = specialMsg.title;
+    msgText.textContent = specialMsg.text;
+  } else {
+    msgTitle.textContent = steps[currentStep].full;
+    msgText.textContent = steps[currentStep].msg;
+  }
+
+  accordions.innerHTML = "";
+  var hasNext = false;
+  for (var j = currentStep + 1; j < steps.length; j++) {
+    hasNext = true;
+    var acc = document.createElement("div");
+    acc.className = "acc";
+    var btn = document.createElement("button");
+    btn.className = "acc-btn";
+    btn.innerHTML = '<span class="acc-arrow">&#9654;</span><span class="acc-num">' + (j + 1) + '</span><span class="acc-name">' + steps[j].full + '</span>';
+    var body = document.createElement("div");
+    body.className = "acc-body";
+    body.textContent = steps[j].detail;
+    btn.addEventListener("click", (function(arrow, bodyEl) {
+      return function() {
+        bodyEl.classList.toggle("open");
+        arrow.classList.toggle("open");
+      };
+    })(btn.querySelector(".acc-arrow"), body));
+    acc.appendChild(btn);
+    acc.appendChild(body);
+    accordions.appendChild(acc);
+  }
+
+  nextSection.style.display = hasNext ? "block" : "none";
+}
+
+render();
+</script>
+</body>
+</html>

@@ -26,14 +26,30 @@
   .msg-dot { width: 8px; height: 8px; border-radius: 50%; background: #6c5ce7; animation: pulse 2s ease-in-out infinite; }
   .msg-title { font-size: 14px; font-weight: 600; color: #6c5ce7; }
   .msg-text { font-size: 14px; color: #5a5178; line-height: 1.6; }
-  .next-h { font-size: 13px; font-weight: 600; color: #6b6b6b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .acc { border: 1px solid #e9e9e7; border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+  .msg-waiting { border-left-color: #e67e22; background: #fef9f3; }
+  .msg-waiting .msg-dot { background: #e67e22; }
+  .msg-waiting .msg-title { color: #e67e22; }
+  .msg-waiting .msg-text { color: #7a5a2f; }
+  .steps-h { font-size: 13px; font-weight: 600; color: #6b6b6b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .acc { border: 1px solid #e9e9e7; border-radius: 8px; margin-bottom: 6px; overflow: hidden; transition: border-color 0.2s; }
+  .acc-done { border-color: #d8d4f7; background: #faf9ff; }
+  .acc-active { border-color: #6c5ce7; border-width: 2px; }
   .acc-btn { width: 100%; background: none; border: none; padding: 12px 14px; font-size: 14px; color: #37352f; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; text-align: left; transition: background 0.2s; }
   .acc-btn:hover { background: #f8f8f6; }
+  .acc-done .acc-btn { color: #6c5ce7; }
   .acc-arrow { font-size: 10px; color: #b0b0a8; transition: transform 0.2s; flex-shrink: 0; }
   .acc-arrow.open { transform: rotate(90deg); }
+  .acc-done .acc-arrow { color: #6c5ce7; }
   .acc-num { width: 22px; height: 22px; border-radius: 50%; background: #e9e9e7; color: #6b6b6b; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .acc-num-done { background: #6c5ce7; color: white; }
+  .acc-num-active { background: #6c5ce7; color: white; animation: pulse 2s ease-in-out infinite; }
+  .acc-check { flex-shrink: 0; color: #6c5ce7; font-size: 16px; }
   .acc-name { flex: 1; }
+  .acc-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; flex-shrink: 0; }
+  .badge-done { background: #ede9fe; color: #6c5ce7; }
+  .badge-active { background: #6c5ce7; color: white; }
+  .badge-todo { background: #f1f1ef; color: #b0b0a8; }
+  .badge-waiting { background: #fef3e2; color: #e67e22; }
   .acc-body { padding: 0 14px 14px 44px; font-size: 13px; color: #6b6b6b; line-height: 1.6; display: none; }
   .acc-body.open { display: block; }
 </style>
@@ -53,10 +69,8 @@
     </div>
     <p class="msg-text" id="msgText"></p>
   </div>
-  <div id="nextSection">
-    <div class="next-h">Prochaines étapes</div>
-    <div id="accordions"></div>
-  </div>
+  <div class="steps-h">Toutes les étapes</div>
+  <div id="accordions"></div>
 </div>
 <script>
 var steps = [
@@ -84,8 +98,8 @@ function render() {
   var stepLabel = document.getElementById("stepLabel");
   var msgTitle = document.getElementById("msgTitle");
   var msgText = document.getElementById("msgText");
+  var msgEl = document.getElementById("msg");
   var accordions = document.getElementById("accordions");
-  var nextSection = document.getElementById("nextSection");
 
   stepLabel.textContent = "Étape " + (currentStep + 1) + "/7";
   bar.innerHTML = "";
@@ -107,7 +121,9 @@ function render() {
     labelsEl.appendChild(lbl);
   }
 
+  msgEl.className = "msg";
   if (isWaiting) {
+    msgEl.className += " msg-waiting";
     msgTitle.textContent = specialMsg.title;
     msgText.textContent = specialMsg.text;
   } else {
@@ -116,18 +132,47 @@ function render() {
   }
 
   accordions.innerHTML = "";
-  var hasNext = false;
-  for (var j = currentStep + 1; j < steps.length; j++) {
-    hasNext = true;
+  var nextStepIndex = currentStep + 1;
+
+  for (var j = 0; j < steps.length; j++) {
     var acc = document.createElement("div");
     acc.className = "acc";
+
+    var isDone = j < currentStep;
+    var isActive = j === currentStep;
+    var isNext = j === nextStepIndex;
+
+    if (isDone) acc.className += " acc-done";
+    if (isActive) acc.className += " acc-active";
+
     var btn = document.createElement("button");
     btn.className = "acc-btn";
-    btn.innerHTML = '<span class="acc-arrow">&#9654;</span><span class="acc-num">' + (j + 1) + '</span><span class="acc-name">' + steps[j].full + '</span>';
+
+    var numClass = "acc-num";
+    if (isDone) numClass += " acc-num-done";
+    if (isActive) numClass += " acc-num-active";
+
+    var badgeClass = "acc-badge ";
+    var badgeText = "";
+    if (isDone) { badgeClass += "badge-done"; badgeText = "Terminée"; }
+    else if (isActive && isWaiting) { badgeClass += "badge-waiting"; badgeText = "En attente"; }
+    else if (isActive) { badgeClass += "badge-active"; badgeText = "En cours"; }
+    else { badgeClass += "badge-todo"; badgeText = "À venir"; }
+
+    var checkmark = isDone ? '<span class="acc-check">✓</span>' : '';
+
+    btn.innerHTML = '<span class="acc-arrow">▶</span>' + checkmark + '<span class="' + numClass + '">' + (j + 1) + '</span><span class="acc-name">' + steps[j].full + '</span><span class="' + badgeClass + '">' + badgeText + '</span>';
+
     var body = document.createElement("div");
     body.className = "acc-body";
     body.textContent = steps[j].detail;
-    btn.addEventListener("click", (function(arrow, bodyEl, idx) {
+
+    if (isNext || (isActive && nextStepIndex >= steps.length)) {
+      body.classList.add("open");
+      btn.querySelector(".acc-arrow").classList.add("open");
+    }
+
+    btn.addEventListener("click", (function(arrow, bodyEl) {
       return function() {
         var allBodies = accordions.querySelectorAll(".acc-body");
         var allArrows = accordions.querySelectorAll(".acc-arrow");
@@ -141,19 +186,11 @@ function render() {
           arrow.classList.add("open");
         }
       };
-    })(btn.querySelector(".acc-arrow"), body, j));
+    })(btn.querySelector(".acc-arrow"), body));
+
     acc.appendChild(btn);
     acc.appendChild(body);
     accordions.appendChild(acc);
-  }
-
-  nextSection.style.display = hasNext ? "block" : "none";
-
-  var firstBody = accordions.querySelector(".acc-body");
-  var firstArrow = accordions.querySelector(".acc-arrow");
-  if (firstBody) {
-    firstBody.classList.add("open");
-    firstArrow.classList.add("open");
   }
 }
 

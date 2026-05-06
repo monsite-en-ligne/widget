@@ -180,7 +180,7 @@ function render() {
     body.className = "acc-body";
     body.textContent = steps[j].detail;
 
-    if (isNext || (isActive && nextStepIndex >= steps.length)) {
+    if (isActive) {
       body.classList.add("open");
       btn.querySelector(".acc-arrow").classList.add("open");
     }

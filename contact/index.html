@@ -8,17 +8,13 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: transparent; color: #37352f; overflow: hidden; }
   html { overflow: hidden; }
-  .w { padding: 20px 24px; }
-  .w-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .w-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #6c5ce7, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .w-title { font-size: 16px; font-weight: 600; color: #37352f; }
-  .w-subtitle { font-size: 12px; color: #9b9a97; }
+  .w { padding: 16px 20px; }
   .form-group { margin-bottom: 14px; position: relative; }
   .form-label { font-size: 12px; font-weight: 500; color: #6b6b6b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
   .form-input { width: 100%; padding: 11px 14px; border: 1.5px solid #e0dfd8; border-radius: 10px; font-size: 14px; color: #37352f; font-family: inherit; background: #fafaf8; outline: none; transition: all 0.25s; }
   .form-input:focus { border-color: #6c5ce7; background: white; box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1); }
   .form-input::placeholder { color: #c0bfb8; }
-  .form-textarea { width: 100%; min-height: 90px; padding: 12px 14px; border: 1.5px solid #e0dfd8; border-radius: 10px; font-size: 14px; color: #37352f; font-family: inherit; resize: none; background: #fafaf8; outline: none; transition: all 0.25s; }
+  .form-textarea { width: 100%; min-height: 100px; padding: 12px 14px; border: 1.5px solid #e0dfd8; border-radius: 10px; font-size: 14px; color: #37352f; font-family: inherit; resize: none; background: #fafaf8; outline: none; transition: all 0.25s; }
   .form-textarea:focus { border-color: #6c5ce7; background: white; box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1); }
   .form-textarea::placeholder { color: #c0bfb8; }
   .form-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
@@ -33,12 +29,9 @@
   .secure-badge { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #b0b0a8; margin-top: 12px; }
   .secure-badge svg { width: 12px; height: 12px; fill: none; stroke: #b0b0a8; stroke-width: 2; }
   @media (max-width: 480px) {
-    .w { padding: 14px 16px; }
-    .w-header { margin-bottom: 12px; }
-    .w-icon { width: 30px; height: 30px; font-size: 15px; border-radius: 8px; }
-    .w-title { font-size: 14px; }
+    .w { padding: 12px 14px; }
     .form-input, .form-textarea { font-size: 13px; padding: 10px 12px; }
-    .form-textarea { min-height: 70px; }
+    .form-textarea { min-height: 80px; }
     .form-btn { padding: 10px 20px; font-size: 13px; }
     .form-footer { flex-direction: column-reverse; gap: 8px; align-items: stretch; }
     .form-btn { justify-content: center; }
@@ -47,14 +40,6 @@
 </head>
 <body>
 <div class="w">
-  <div class="w-header">
-    <div class="w-icon">✉️</div>
-    <div>
-      <div class="w-title">Nous contacter</div>
-      <div class="w-subtitle">Retours, questions, demandes — nous vous répondons rapidement.</div>
-    </div>
-  </div>
-
   <div class="form-group">
     <label class="form-label">Objet</label>
     <input type="text" class="form-input" id="subject" placeholder="Ex : Retour sur mon site, question sur un service...">

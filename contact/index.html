@@ -1,6 +1,13 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Widget Contact</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: none; color: #2d2d2d; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: none; color: #2d2d2d; overflow: hidden; }
+  html { overflow: hidden; }
   .w { padding: 16px 20px; }
   .form-group { margin-bottom: 18px; }
   .form-label { font-size: 11px; font-weight: 600; color: #8a8a8a; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; display: block; }
@@ -32,10 +39,10 @@
   @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
   @keyframes rotateBorder { to { --angle: 360deg; } }
 
-  .form-input { width: 100%; padding: 13px 16px; border: none; border-radius: 12px; font-size: 14px; color: #2d2d2d; font-family: inherit; background: #f8f8f6; outline: none; transition: all 0.3s ease; }
+  .form-input { width: 100%; padding: 13px 16px; border: none; border-radius: 12px; font-size: 14px; color: #2d2d2d; font-family: inherit; background: #f8f8f6; outline: none; transition: all 0.3s ease; position: relative; z-index: 1; }
   .form-input:focus { background: #fff; }
   .form-input::placeholder { color: #bbb; }
-  .form-textarea { width: 100%; min-height: 110px; padding: 13px 16px; border: none; border-radius: 12px; font-size: 14px; color: #2d2d2d; font-family: inherit; resize: none; background: #f8f8f6; outline: none; transition: all 0.3s ease; }
+  .form-textarea { width: 100%; min-height: 110px; padding: 13px 16px; border: none; border-radius: 12px; font-size: 14px; color: #2d2d2d; font-family: inherit; resize: none; background: #f8f8f6; outline: none; transition: all 0.3s ease; position: relative; z-index: 1; }
   .form-textarea:focus { background: #fff; }
   .form-textarea::placeholder { color: #bbb; }
   .form-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
@@ -46,15 +53,25 @@
   .form-btn:active:not(:disabled) { transform: translateY(0); }
   .form-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .form-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: 0.8; }
-  .form-status { font-size: 13px; color: #999; }
+  .form-status { font-size: 13px; color: #999; transition: all 0.3s; }
   .form-status.success { color: #2d2d2d; font-weight: 500; }
   .form-status.error { color: #c0392b; }
   .secure-badge { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #aaa; margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee; }
   .secure-badge svg { width: 13px; height: 13px; fill: none; stroke: #aaa; stroke-width: 1.5; flex-shrink: 0; }
   .online-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 6px rgba(46,204,113,0.4); animation: dotGlow 2.5s ease-in-out infinite; flex-shrink: 0; }
   @keyframes dotGlow { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-</style>
 
+  @media (max-width: 480px) {
+    .w { padding: 12px 14px; }
+    .form-input, .form-textarea { font-size: 13px; padding: 11px 14px; }
+    .form-textarea { min-height: 90px; }
+    .form-btn { padding: 11px 22px; font-size: 13px; }
+    .form-footer { flex-direction: column-reverse; gap: 10px; align-items: stretch; }
+    .form-btn { justify-content: center; }
+  }
+</style>
+</head>
+<body>
 <div class="w">
   <div class="form-group">
     <label class="form-label">Objet</label>
@@ -137,7 +154,7 @@ function sendMessage() {
     })
     .then(function(r) {
       if (r.ok) {
-        status.textContent = "✓ Message envoyé avec succès";
+        status.textContent = "\u2713 Message envoyé avec succès";
         status.className = "form-status success";
         document.getElementById("message").value = "";
         document.getElementById("subject").value = "";
@@ -150,10 +167,12 @@ function sendMessage() {
       sendBtn.disabled = false;
     });
   } else {
-    window.open("mailto:" + email + "?subject=" + encodeURIComponent(subject + " — " + clientName) + "&body=" + encodeURIComponent(message));
-    status.textContent = "✓ Votre messagerie va s'ouvrir...";
+    window.open("mailto:" + email + "?subject=" + encodeURIComponent(subject + " \u2014 " + clientName) + "&body=" + encodeURIComponent(message));
+    status.textContent = "\u2713 Votre messagerie va s'ouvrir...";
     status.className = "form-status success";
     sendBtn.disabled = false;
   }
 }
 </script>
+</body>
+</html>
